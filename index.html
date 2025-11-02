@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幻境漫游向导 - 智能AI对话</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e6e6e6;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 90px 40px, #ddd, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 160px 120px, #fff, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 200px 100px;
+            animation: starTwinkle 6s linear infinite;
+        }
+
+        @keyframes starTwinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.8; }
+        }
+
+        .floating-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(50px);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 2rem;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #a8edea 0%, #fed6e3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+            color: #b8b8b8;
+            line-height: 1.6;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 600px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .welcome-text {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            color: #d1d1d1;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+            width: 100%;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #e6e6e6;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: #a8edea;
+        }
+
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .scene-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 2rem 0;
+            width: 100%;
+        }
+
+        .scene-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .scene-card:hover {
+            transform: scale(1.03);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .scene-card.selected {
+            border-color: #a8edea;
+            background: rgba(168, 237, 234, 0.1);
+            box-shadow: 0 0 15px rgba(168, 237, 234, 0.2);
+        }
+
+        .scene-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #a8edea;
+        }
+
+        .scene-name {
+            font-size: 1rem;
+            color: #fff;
+        }
+
+        .scene-desc {
+            font-size: 0.8rem;
+            color: #b8b8b8;
+            margin-top: 0.3rem;
+        }
+
+        .duration-options {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+
+        .duration-btn {
+            padding: 0.8rem 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .duration-btn:hover {
+            background: rgba(168, 237, 234, 0.1);
+            border-color: #a8edea;
+        }
+
+        .duration-btn.selected {
+            background: rgba(168, 237, 234, 0.2);
+            border-color: #a8edea;
+            color: #a8edea;
+            box-shadow: 0 0 10px rgba(168, 237, 234, 0.3);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #a8edea, #fed6e3);
+            color: #333;
+            box-shadow: 0 4px 15px rgba(168, 237, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(168, 237, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #a8edea;
+            border: 1px solid #a8edea;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(168, 237, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .status {
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: #b8b8b8;
+            display: none;
+        }
+
+        .status.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .relaxation-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: rgba(10, 15, 30, 0.95);
+            z-index: 100;
+        }
+
+        .breathing-animation {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(168, 237, 234, 0.2), transparent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            animation: breathe 4s infinite ease-in-out;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(0.8); }
+            50% { transform: scale(1.2); }
+        }
+
+        .relaxation-text {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: #a8edea;
+        }
+
+        .relaxation-instruction {
+            font-size: 1.1rem;
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.8;
+            color: #d1d1d1;
+        }
+
+        .timer {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 1rem 0;
+            color: #fed6e3;
+        }
+
+        .exit-btn {
+            margin-top: 2rem;
+            padding: 0.8rem 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .exit-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: rgba(25, 30, 48, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: modalAppear 0.3s ease;
+        }
+
+        @keyframes modalAppear {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: #a8edea;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #b8b8b8;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: #fff;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .data-label {
+            color: #b8b8b8;
+        }
+
+        .data-value {
+            color: #fed6e3;
+            font-weight: 500;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .modal-btn {
+            padding: 0.7rem 1.5rem;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn-primary {
+            background: linear-gradient(45deg, #a8edea, #fed6e3);
+            color: #333;
+        }
+
+        .modal-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e6e6e6;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* AI聊天界面 */
+        .chat-container {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: rgba(10, 15, 30, 0.95);
+            z-index: 100;
+        }
+
+        .chat-header {
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-title {
+            font-size: 1.5rem;
+            color: #a8edea;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 1rem;
+            border-radius: 15px;
+            line-height: 1.5;
+            animation: messageAppear 0.3s ease;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        @keyframes messageAppear {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: linear-gradient(45deg, #a8edea, #87d8e5);
+            color: #333;
+            border-bottom-right-radius: 5px;
+        }
+
+        .ai-message {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.1);
+            color: #e6e6e6;
+            border-bottom-left-radius: 5px;
+        }
+
+        .chat-input-area {
+            padding: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 1rem;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: #a8edea;
+        }
+
+        .send-btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            border: none;
+            background: linear-gradient(45deg, #a8edea, #fed6e3);
+            color: #333;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(168, 237, 234, 0.3);
+        }
+
+        .back-btn {
+            margin-top: 1rem;
+            padding: 0.8rem 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .title {
+                font-size: 2rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .scene-options {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+            }
+            
+            .modal-content {
+                margin: 1rem;
+                width: calc(100% - 2rem);
+            }
+            
+            .chat-header {
+                padding: 1rem;
+            }
+            
+            .chat-messages {
+                padding: 1rem;
+            }
+            
+            .chat-input-area {
+                padding: 1rem;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background">
+        <div class="stars"></div>
+        <div class="floating-particles" id="particles"></div>
+    </div>
+
+    <div class="container">
+        <div class="logo">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#a8edea" stroke-width="2" stroke-dasharray="5,5"/>
+                <path d="M30,50 Q50,30 70,50 T30,50" fill="none" stroke="#fed6e3" stroke-width="3"/>
+            </svg>
+        </div>
+
+        <h1 class="title">幻境漫游向导</h1>
+        <p class="subtitle">开启您的深度放松之旅，让心灵回归宁静</p>
+
+        <div class="card">
+            <p class="welcome-text">
+                您好，我是您的AI向导。在这里，您可以暂时放下烦恼，跟随我的引导，进入一个宁静的幻境世界。
+                让我们开始一段放松身心的旅程吧。
+            </p>
+
+            <div class="input-group">
+                <label for="mood">您现在的心情如何？</label>
+                <input type="text" id="mood" class="input-field" placeholder="例如：有些疲惫、感到焦虑、想要放松..." />
+            </div>
+
+            <div class="input-group">
+                <label>选择您想要的放松场景</label>
+                <div class="scene-options">
+                    <div class="scene-card" data-scene="forest">
+                        <div class="scene-icon">🌳</div>
+                        <div class="scene-name">静谧森林</div>
+                        <div class="scene-desc">聆听鸟鸣，感受微风</div>
+                    </div>
+                    <div class="scene-card" data-scene="ocean">
+                        <div class="scene-icon">🌊</div>
+                        <div class="scene-name">宁静海滩</div>
+                        <div class="scene-desc">感受海浪，沐浴阳光</div>
+                    </div>
+                    <div class="scene-card" data-scene="mountain">
+                        <div class="scene-icon">🏔️</div>
+                        <div class="scene-name">高山之巅</div>
+                        <div class="scene-desc">云海翻腾，心旷神怡</div>
+                    </div>
+                    <div class="scene-card" data-scene="starlight">
+                        <div class="scene-icon">✨</div>
+                        <div class="scene-name">星空之下</div>
+                        <div class="scene-desc">仰望星空，思绪飘远</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>选择放松时长</label>
+                <div class="duration-options">
+                    <button class="duration-btn" data-time="5">5分钟</button>
+                    <button class="duration-btn" data-time="10">10分钟</button>
+                    <button class="duration-btn selected" data-time="15">15分钟</button>
+                    <button class="duration-btn" data-time="20">20分钟</button>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" id="start-btn">开始漫游</button>
+                <button class="btn btn-secondary" id="demo-btn">体验演示</button>
+                <button class="btn btn-secondary" id="chat-btn">AI对话</button>
+            </div>
+
+            <div class="status" id="status">
+                正在为您准备专属的放松体验...请稍候
+            </div>
+        </div>
+    </div>
+
+    <div class="relaxation-screen" id="relaxation-screen">
+        <div class="breathing-animation"></div>
+        <div class="relaxation-text" id="relaxation-text">开始深呼吸</div>
+        <div class="relaxation-instruction" id="relaxation-instruction">
+            请跟随我的引导，进行深呼吸练习。吸气4秒，屏息4秒，呼气6秒。
+        </div>
+        <div class="timer" id="timer">15:00</div>
+        <button class="exit-btn" id="exit-btn">结束漫游</button>
+    </div>
+
+    <!-- AI聊天界面 -->
+    <div class="chat-container" id="chat-container">
+        <div class="chat-header">
+            <h2 class="chat-title">幻境漫游向导 - AI对话</h2>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="message ai-message">
+                您好！我是幻境漫游向导，很高兴为您服务。您可以和我聊聊您当前的心情、想要放松的场景，或者任何您想分享的内容。我会陪伴您度过一个宁静的时光。
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" class="chat-input" id="chat-input" placeholder="输入您的消息...">
+            <button class="send-btn" id="send-btn">发送</button>
+        </div>
+        <div style="text-align: center;">
+            <button class="back-btn" id="back-btn">返回主界面</button>
+        </div>
+    </div>
+
+    <!-- 数据展示弹窗 -->
+    <div class="modal" id="data-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">场景详情</h2>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- 数据将通过JavaScript动态填充 -->
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-secondary" id="cancel-btn">取消</button>
+                <button class="modal-btn modal-btn-primary" id="select-btn">选择此场景</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 创建浮动粒子
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = 20;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // 随机位置
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.top = Math.random() * 100 + 'vh';
+                
+                // 随机动画延迟
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                
+                // 随机大小
+                const size = Math.random() * 3 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                
+                // 随机动画时长
+                const duration = Math.random() * 10 + 10;
+                particle.style.animationDuration = duration + 's';
+                
+                container.appendChild(particle);
+            }
+        }
+        
+        // 场景选择交互
+        document.querySelectorAll('.scene-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.scene-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+        
+        // 时长选择交互
+        document.querySelectorAll('.duration-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+        
+        // 开始按钮交互
+        document.getElementById('start-btn').addEventListener('click', function() {
+            const moodInput = document.getElementById('mood').value;
+            const selectedScene = document.querySelector('.scene-card.selected');
+            const selectedTime = document.querySelector('.duration-btn.selected').dataset.time;
+            
+            if (!selectedScene) {
+                alert('请选择一个放松场景');
+                return;
+            }
+            
+            const status = document.getElementById('status');
+            status.classList.add('show');
+            status.textContent = '正在为您准备专属的放松体验...请稍候';
+            
+            // 模拟加载过程
+            setTimeout(() => {
+                status.textContent = '放松体验已开始，祝您旅途愉快...';
+                
+                // 2秒后切换到放松界面
+                setTimeout(() => {
+                    showRelaxationScreen(selectedTime);
+                }, 2000);
+            }, 1500);
+        });
+        
+        // 演示按钮
+        document.getElementById('demo-btn').addEventListener('click', function() {
+            document.getElementById('mood').value = '好奇';
+            document.querySelector('.scene-card[data-scene="starlight"]').click();
+            document.querySelector('.duration-btn[data-time="5"]').click();
+            
+            setTimeout(() => {
+                document.getElementById('start-btn').click();
+            }, 500);
+        });
+        
+        // AI对话按钮
+        document.getElementById('chat-btn').addEventListener('click', function() {
+            document.querySelector('.container').style.display = 'none';
+            document.getElementById('chat-container').style.display = 'flex';
+        });
+        
+        // 显示放松界面
+        function showRelaxationScreen(duration) {
+            document.querySelector('.container').style.display = 'none';
+            document.getElementById('relaxation-screen').style.display = 'flex';
+            
+            // 设置倒计时
+            let timeLeft = parseInt(duration) * 60; // 转换为秒
+            updateTimer(timeLeft);
+            
+            // 开始倒计时
+            const timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimer(timeLeft);
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('relaxation-text').textContent = '放松时间结束';
+                    document.getElementById('relaxation-instruction').textContent = '感谢您体验幻境漫游向导，希望您感到更加平静与放松。';
+                    
+                    setTimeout(() => {
+                        document.getElementById('exit-btn').textContent = '返回主界面';
+                    }, 3000);
+                }
+            }, 1000);
+        }
+        
+        // 更新计时器显示
+        function updateTimer(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+        
+        // 结束放松体验
+        document.getElementById('exit-btn').addEventListener('click', function() {
+            document.querySelector('.container').style.display = 'flex';
+            document.getElementById('relaxation-screen').style.display = 'none';
+            
+            // 重置表单
+            document.getElementById('mood').value = '';
+            document.querySelectorAll('.scene-card').forEach(c => c.classList.remove('selected'));
+            document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelector('.duration-btn[data-time="15"]').classList.add('selected');
+            document.getElementById('status').classList.remove('show');
+            
+            // 重新选择默认场景
+            setTimeout(() => {
+                document.querySelector('.scene-card').click();
+            }, 100);
+        });
+        
+        // 返回主界面
+        document.getElementById('back-btn').addEventListener('click', function() {
+            document.querySelector('.container').style.display = 'flex';
+            document.getElementById('chat-container').style.display = 'none';
+            
+            // 清空聊天记录
+            document.getElementById('chat-messages').innerHTML = `
+                <div class="message ai-message">
+                    您好！我是幻境漫游向导，很高兴为您服务。您可以和我聊聊您当前的心情、想要放松的场景，或者任何您想分享的内容。我会陪伴您度过一个宁静的时光。
+                </div>
+            `;
+        });
+        
+        // 弹窗相关功能
+        const modal = document.getElementById('data-modal');
+        const modalBody = document.getElementById('modal-body');
+        const closeModal = document.getElementById('close-modal');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const selectBtn = document.getElementById('select-btn');
+        
+        // 场景数据
+        const sceneData = {
+            forest: {
+                name: '静谧森林',
+                description: '在静谧的森林中，您可以聆听鸟鸣声、溪水声和风吹树叶的声音，感受大自然的宁静与和谐。',
+                benefits: '降低压力荷尔蒙，提升注意力，增强免疫系统',
+                duration: '建议15-30分钟',
+                elements: '树木、鸟鸣、微风、阳光斑驳'
+            },
+            ocean: {
+                name: '宁静海滩',
+                description: '在宁静的海滩上，您可以感受海浪拍打岸边的节奏，聆听海风的声音，享受海天一色的壮丽景色。',
+                benefits: '深度放松，改善睡眠，缓解焦虑',
+                duration: '建议20-40分钟',
+                elements: '海浪、海风、阳光、沙滩'
+            },
+            mountain: {
+                name: '高山之巅',
+                description: '在高山之巅，您可以俯瞰云海翻腾，呼吸清新的空气，感受山峰的雄伟与宁静。',
+                benefits: '提升专注力，增强肺活量，净化心灵',
+                duration: '建议15-25分钟',
+                elements: '云海、山峰、清风、远景'
+            },
+            starlight: {
+                name: '星空之下',
+                description: '在星空之下，您可以仰望璀璨的星辰，感受宇宙的浩瀚与神秘，让思绪在无垠的夜空中自由飘荡。',
+                benefits: '促进冥想，提升创造力，缓解心理压力',
+                duration: '建议20-35分钟',
+                elements: '繁星、月光、夜空、宁静'
+            }
+        };
+        
+        // 为每个场景卡片添加点击事件来显示弹窗
+        document.querySelectorAll('.scene-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const sceneId = this.dataset.scene;
+                const sceneInfo = sceneData[sceneId];
+                
+                // 填充弹窗内容
+                modalBody.innerHTML = `
+                    <div class="data-item">
+                        <span class="data-label">场景名称:</span>
+                        <span class="data-value">${sceneInfo.name}</span>
+                    </div>
+                    <div class="data-item">
+                        <span class="data-label">场景描述:</span>
+                        <span class="data-value">${sceneInfo.description}</span>
+                    </div>
+                    <div class="data-item">
+                        <span class="data-label">健康益处:</span>
+                        <span class="data-value">${sceneInfo.benefits}</span>
+                    </div>
+                    <div class="data-item">
+                        <span class="data-label">建议时长:</span>
+                        <span class="data-value">${sceneInfo.duration}</span>
+                    </div>
+                    <div class="data-item">
+                        <span class="data-label">场景元素:</span>
+                        <span class="data-value">${sceneInfo.elements}</span>
+                    </div>
+                `;
+                
+                // 显示弹窗
+                modal.style.display = 'flex';
+                
+                // 设置选中的场景ID，供选择按钮使用
+                selectBtn.dataset.scene = sceneId;
+            });
+        });
+        
+        // 关闭弹窗
+        closeModal.addEventListener('click', closeDataModal);
+        cancelBtn.addEventListener('click', closeDataModal);
+        
+        function closeDataModal() {
+            modal.style.display = 'none';
+        }
+        
+        // 选择场景
+        selectBtn.addEventListener('click', function() {
+            const sceneId = this.dataset.scene;
+            // 高亮选中的场景卡片
+            document.querySelectorAll('.scene-card').forEach(card => {
+                card.classList.remove('selected');
+                if (card.dataset.scene === sceneId) {
+                    card.classList.add('selected');
+                }
+            });
+            
+            // 关闭弹窗
+            modal.style.display = 'none';
+        });
+        
+        // 点击弹窗外部关闭弹窗
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+        
+        // AI聊天功能
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        
+        // 发送消息
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message) {
+                // 添加用户消息
+                addMessage(message, 'user');
+                chatInput.value = '';
+                
+                // 模拟AI回复
+                setTimeout(() => {
+                    const aiResponse = generateAIResponse(message);
+                    addMessage(aiResponse, 'ai');
+                }, 1000);
+            }
+        }
+        
+        // 添加消息到聊天记录
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(sender === 'user' ? 'user-message' : 'ai-message');
+            messageDiv.textContent = text;
+            chatMessages.appendChild(messageDiv);
+            
+            // 滚动到底部
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // 生成AI回复
+        function generateAIResponse(userMessage) {
+            const lowerMessage = userMessage.toLowerCase();
+            
+            // 问候类
+            if (lowerMessage.includes('你好') || lowerMessage.includes('您好') || lowerMessage.includes('hi') || lowerMessage.includes('hello')) {
+                const greetings = [
+                    '您好！我是幻境漫游向导，很高兴为您服务。您可以和我聊聊您当前的心情，或者选择一个放松的场景。宁静的环境有助于我们更好地交流。',
+                    '您好！欢迎来到幻境漫游向导。我是您的AI伙伴，随时准备陪伴您度过一段宁静的时光。您今天想聊些什么呢？',
+                    '您好！很高兴见到您。在这里，您可以暂时放下烦恼，与我分享您的感受或想法。让我们一起进入宁静的幻境世界吧。'
+                ];
+                return greetings[Math.floor(Math.random() * greetings.length)];
+            }
+            
+            // 放松/冥想/平静相关
+            if (lowerMessage.includes('放松') || lowerMessage.includes('冥想') || lowerMessage.includes('平静') || lowerMessage.includes('安静') || lowerMessage.includes('宁静')) {
+                const relaxResponses = [
+                    '放松是一个很好的选择！我们有静谧森林、宁静海滩、高山之巅和星空之下四种场景。您可以选择一个您喜欢的场景，我会引导您进行深度放松。这些场景都有助于缓解压力，提升专注力。',
+                    '冥想和放松对身心健康非常有益。在宁静的环境中，我们可以更好地处理情绪，释放压力。您想选择哪个场景开始我们的放松之旅呢？',
+                    '宁静的环境有助于我们的心灵回归平静。通过深呼吸和冥想，我们可以更好地与内心对话。您觉得哪个场景适合您现在的心情？'
+                ];
+                return relaxResponses[Math.floor(Math.random() * relaxResponses.length)];
+            }
+            
+            // 森林相关
+            if (lowerMessage.includes('森林') || lowerMessage.includes('树林') || lowerMessage.includes('树木') || lowerMessage.includes('鸟鸣') || lowerMessage.includes('自然')) {
+                const forestResponses = [
+                    '静谧森林是一个非常棒的选择！在这里，您可以聆听鸟鸣声、溪水声和风吹树叶的声音，感受大自然的宁静与和谐。森林中的负离子有助于净化空气，提升心情。',
+                    '森林是大自然的疗愈场所。在静谧森林中，您可以感受到树木的生命力，聆听自然的声音，让身心完全放松。这是缓解压力和焦虑的理想环境。',
+                    '树木和自然的声音具有强大的疗愈效果。在森林场景中，您可以想象自己漫步在绿意盎然的小径上，呼吸清新的空气，感受大自然的宁静。'
+                ];
+                return forestResponses[Math.floor(Math.random() * forestResponses.length)];
+            }
+            
+            // 海洋/海滩相关
+            if (lowerMessage.includes('海滩') || lowerMessage.includes('海洋') || lowerMessage.includes('海浪') || lowerMessage.includes('沙滩') || lowerMessage.includes('海水')) {
+                const oceanResponses = [
+                    '宁静海滩是放松身心的绝佳场所！您可以感受海浪拍打岸边的节奏，聆听海风的声音，享受海天一色的壮丽景色。海浪的声音有助于调节呼吸，带来平静。',
+                    '海洋具有天然的疗愈力量。在海滩场景中，您可以想象自己赤脚走在柔软的沙滩上，感受海风的轻抚，聆听海浪的韵律。这是缓解焦虑的完美选择。',
+                    '海浪的声音被称为大自然的白噪音，能够帮助我们放松和集中注意力。在宁静海滩场景中，您可以完全沉浸在海洋的宁静中。'
+                ];
+                return oceanResponses[Math.floor(Math.random() * oceanResponses.length)];
+            }
+            
+            // 山峰相关
+            if (lowerMessage.includes('高山') || lowerMessage.includes('山顶') || lowerMessage.includes('山峰') || lowerMessage.includes('云海') || lowerMessage.includes('远山')) {
+                const mountainResponses = [
+                    '高山之巅能让您俯瞰云海翻腾，呼吸清新的空气，感受山峰的雄伟与宁静。这是一个提升专注力、净化心灵的好地方。高海拔的清新空气有助于深呼吸。',
+                    '在高山之巅，您可以感受到大自然的宏伟与宁静。云海翻腾的景象能让人心旷神怡，远离尘世的喧嚣。这是一个进行深度冥想的理想场所。',
+                    '山峰的宁静能让人感受到内心的平静。在高山之巅场景中，您可以想象自己站在山峰上，俯瞰壮丽景色，感受心灵的净化。'
+                ];
+                return mountainResponses[Math.floor(Math.random() * mountainResponses.length)];
+            }
+            
+            // 星空相关
+            if (lowerMessage.includes('星空') || lowerMessage.includes('夜晚') || lowerMessage.includes('星星') || lowerMessage.includes('月亮') || lowerMessage.includes('宇宙')) {
+                const starlightResponses = [
+                    '在星空之下，您可以仰望璀璨的星辰，感受宇宙的浩瀚与神秘，让思绪在无垠的夜空中自由飘荡。星空冥想有助于提升创造力和内省。',
+                    '夜空中的繁星让人感受到宇宙的宁静与神秘。在星空之下场景中，您可以进行深度冥想，让思绪随着星光飘向远方，释放内心的压力。',
+                    '星空是大自然最美丽的冥想场所之一。在宁静的夜空下，您可以思考生命的意义，感受与宇宙的连接，获得内心的平静。'
+                ];
+                return starlightResponses[Math.floor(Math.random() * starlightResponses.length)];
+            }
+            
+            // 压力/焦虑/烦恼相关
+            if (lowerMessage.includes('压力') || lowerMessage.includes('焦虑') || lowerMessage.includes('烦恼') || lowerMessage.includes('紧张') || lowerMessage.includes('不安') || lowerMessage.includes('困扰')) {
+                const stressResponses = [
+                    '我理解您现在的感受。压力和焦虑是现代生活中常见的挑战。通过深呼吸和冥想，我们可以一起缓解这些不适。选择一个您喜欢的场景，让我们开始放松之旅吧。',
+                    '感受到压力是很正常的，重要的是学会如何应对。在宁静的环境中进行深呼吸练习，可以有效缓解焦虑。您想选择哪个场景来帮助您放松呢？',
+                    '每个人都会有压力和焦虑的时刻，这是人之常情。通过冥想和放松练习，我们可以学会更好地管理情绪。让我们一起创造一个宁静的空间来平复心情。'
+                ];
+                return stressResponses[Math.floor(Math.random() * stressResponses.length)];
+            }
+            
+            // 感谢相关
+            if (lowerMessage.includes('感谢') || lowerMessage.includes('谢谢') || lowerMessage.includes('感激')) {
+                const thanksResponses = [
+                    '不客气！很高兴能帮助到您。如果您有任何其他问题或需要进一步的放松指导，请随时告诉我。我会一直在这里陪伴您。',
+                    '感谢您的信任！能够为您提供帮助是我的荣幸。如果您觉得需要更多的放松时间，随时可以回来找我。',
+                    '您太客气了！我很高兴能成为您放松旅程的一部分。记得，无论何时感到压力，都可以回来找我，我们一起放松身心。'
+                ];
+                return thanksResponses[Math.floor(Math.random() * thanksResponses.length)];
+            }
+            
+            // 告别相关
+            if (lowerMessage.includes('再见') || lowerMessage.includes('拜拜') || lowerMessage.includes('结束') || lowerMessage.includes('下次')) {
+                const goodbyeResponses = [
+                    '再见！希望您今天过得愉快。记得，无论何时感到压力，都可以回来找我，我们一起放松身心。祝您拥有美好的一天！',
+                    '很高兴能与您交流！如果您需要更多的放松时间，随时可以回来。愿您带着宁静的心情离开，期待下次再见。',
+                    '感谢您的陪伴！希望我们的对话对您有所帮助。记得保持内心的平静，我们随时欢迎您的归来。再见！'
+                ];
+                return goodbyeResponses[Math.floor(Math.random() * goodbyeResponses.length)];
+            }
+            
+            // 深度对话相关
+            if (lowerMessage.includes('感觉') || lowerMessage.includes('感受') || lowerMessage.includes('心情') || lowerMessage.includes('情绪') || lowerMessage.includes('内心') || lowerMessage.includes('想法')) {
+                const feelingResponses = [
+                    '感觉和情绪是我们内心世界的反映。通过冥想和放松，我们可以更好地理解和接纳自己的感受。您愿意分享一下您现在的内心状态吗？',
+                    '情绪是我们内在体验的重要部分。在宁静的环境中，我们可以更深入地探索自己的感受。您现在最想表达的是什么？',
+                    '内心的感受值得被认真对待。在这里，您可以自由地表达您的想法和情绪，我会陪伴您度过这段探索内心的时间。'
+                ];
+                return feelingResponses[Math.floor(Math.random() * feelingResponses.length)];
+            }
+            
+            // 呼吸/冥想技巧
+            if (lowerMessage.includes('呼吸') || lowerMessage.includes('深呼吸') || lowerMessage.includes('技巧') || lowerMessage.includes('方法') || lowerMessage.includes('练习')) {
+                const breathingResponses = [
+                    '深呼吸是一种简单而有效的放松技巧。建议您采用4-4-6的呼吸法：吸气4秒，屏息4秒，呼气6秒。在选择的场景中，重复这个过程，让身心逐渐平静下来。',
+                    '呼吸练习是冥想的基础。通过有意识的呼吸，我们可以激活副交感神经系统，降低心率和血压。您可以在任何场景中实践这个技巧。',
+                    '呼吸是连接身心的桥梁。深而缓慢的呼吸有助于放松神经系统，释放紧张情绪。建议您在放松时专注于呼吸的节奏。'
+                ];
+                return breathingResponses[Math.floor(Math.random() * breathingResponses.length)];
+            }
+            
+            // 健康/养生相关
+            if (lowerMessage.includes('健康') || lowerMessage.includes('养生') || lowerMessage.includes('身体') || lowerMessage.includes('身心') || lowerMessage.includes('疗愈') || lowerMessage.includes('治愈')) {
+                const healthResponses = [
+                    '身心健康是幸福生活的基础。通过冥想和放松，我们不仅可以缓解心理压力，还能改善身体状况。规律的放松练习对免疫系统、心血管系统都有益处。',
+                    '身心一体化的疗愈是最有效的。在宁静的环境中，我们的身体和心灵都能得到充分的休息和恢复。持续的放松练习有助于提升整体健康水平。',
+                    '健康的生活方式包括身体和心理的双重照顾。冥想和放松不仅能减轻压力，还能提升睡眠质量、增强专注力。您平时有进行哪些健康活动呢？'
+                ];
+                return healthResponses[Math.floor(Math.random() * healthResponses.length)];
+            }
+            
+            // 时间管理/生活平衡
+            if (lowerMessage.includes('时间') || lowerMessage.includes('忙碌') || lowerMessage.includes('平衡') || lowerMessage.includes('生活') || lowerMessage.includes('节奏') || lowerMessage.includes('工作')) {
+                const timeResponses = [
+                    '现代生活的快节奏确实容易让人感到疲惫。学会在忙碌中为自己创造宁静时刻很重要。即使每天只有10-15分钟的冥想时间，也能带来显著的放松效果。',
+                    '生活平衡是身心健康的关键。在工作和休息之间找到平衡点，定期给自己安排放松时间，有助于提高工作效率和生活质量。',
+                    '时间管理不仅关乎效率，更关乎身心健康。为自己预留固定的放松时间，就像安排重要会议一样，这样能确保您有足够的时间来照顾内心。'
+                ];
+                return timeResponses[Math.floor(Math.random() * timeResponses.length)];
+            }
+            
+            // 默认回复
+            const defaultResponses = [
+                '我明白了，您想分享的是："' + userMessage + '"。这听起来很有意思。您愿意详细说说吗？在宁静的环境中，我们可以更深入地探讨这个话题。',
+                '感谢您分享这个想法。在放松的状态下，我们可以更好地处理这些想法。您觉得哪个场景适合您现在的心境来继续我们的对话？',
+                '这是一个很有趣的话题。在宁静的幻境中，我们可以慢慢思考和探索。您想深入了解这个话题的哪个方面呢？',
+                '您的想法很有价值。在这样的环境中，我们可以更清晰地思考。您现在想体验哪种场景来帮助您进一步放松呢？',
+                '我理解您想要表达的。有时候，与他人分享感受本身就是一种放松。要试试静谧森林或宁静海滩吗？它们都能帮助您更好地表达内心。',
+                '这确实是一个值得思考的问题。在宁静的环境中，我们可以更深入地探索。您觉得哪种场景最适合您现在的思考状态？',
+                '您提到的这个观点很有深度。在放松的状态下，我们可以更好地理解和处理复杂的想法。您现在的心情如何？',
+                '我感受到您想要表达的意图。在这样的对话中，重要的是找到内心的平静。您觉得哪个场景能帮助您达到这种状态？',
+                '这是一个很有意义的分享。在宁静的空间里，我们可以慢慢消化和理解这些想法。您希望我为您提供什么帮助呢？',
+                '您的感受和想法都值得被倾听。在这里，您可以自由地表达自己。您现在最需要的是什么？'
+            ];
+            return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+        }
+        
+        // 发送按钮事件
+        sendBtn.addEventListener('click', sendMessage);
+        
+        // 回车发送消息
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // 页面加载完成后执行
+        window.onload = function() {
+            createParticles();
+            
+            // 默认选择第一个场景
+            document.querySelector('.scene-card').click();
+        };
+    </script>
+</body>
+</html>
